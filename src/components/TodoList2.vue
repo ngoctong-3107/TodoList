@@ -13,10 +13,10 @@
     </div>
     <Toast />
     <ConfirmDialog></ConfirmDialog>
-    <Card v-for="(t, index) in todos" :key="t" class="my-3 text-sm">
+    <Card v-for="(t, index) in paginatedTodos" :key="t" class="my-3 text-sm">
       <template #content>
         <div class="flex items-center justify-between">
-          <p class="max-w-[400px] overflow-hidden">{{ t.title }}</p>
+          <span class="max-w-[400px] overflow-hidden">{{ t.title }}</span>
           <div class="flex gap-2 min-w-[250px] justify-between items-center">
             <div>
               <Tag
@@ -46,6 +46,13 @@
         </div>
       </template>
     </Card>
+    <Paginator
+      :rows="rowsPerPage"
+      :totalRecords="todos.length"
+      :rowsPerPageOptions="[3, 5]"
+      @page="onPageChange"
+    ></Paginator>
+
     <Dialog
       v-model:visible="editVisible"
       header="Edit Todo"
@@ -116,13 +123,14 @@ import Card from "primevue/card";
 import ConfirmDialog from "primevue/confirmdialog";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
+import Paginator from "primevue/paginator";
 import RadioButton from "primevue/radiobutton";
 import Tag from "primevue/tag";
 import Toast from "primevue/toast";
 import { useConfirm } from "primevue/useconfirm";
 
 import { useToast } from "primevue/usetoast";
-import { onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -133,6 +141,20 @@ const editVisible = ref(false);
 const editTodo = ref("");
 const status = ref("");
 const editId = ref();
+
+const currentPage = ref(0);
+const rowsPerPage = ref(3);
+
+const paginatedTodos = computed(() => {
+  const start = currentPage.value * rowsPerPage.value;
+  const end = start + rowsPerPage.value;
+  return todos.value.slice(start, end);
+});
+
+const onPageChange = (event) => {
+  currentPage.value = event.page;
+  rowsPerPage.value = event.rows;
+};
 
 const handleAdd = () => {
   if (todo.value.trim() !== "") {
@@ -150,7 +172,7 @@ const openDialogUpdate = (currentStatus, currentTitle, id) => {
   editVisible.value = true;
   status.value = currentStatus;
   editTodo.value = currentTitle;
-  editId.value = id;
+  editId.value = currentPage.value * rowsPerPage.value + id;
 };
 
 const handleUpdate = () => {
@@ -174,7 +196,8 @@ const getFromStorage = () => {
   todos.value = todoList ? JSON.parse(todoList) : [];
 };
 const handleDelete = (index) => {
-  todos.value.splice(index, 1);
+  const actualIdx = currentPage.value * rowsPerPage.value + index;
+  todos.value.splice(actualIdx, 1);
   saveToStorage();
 };
 
@@ -226,7 +249,7 @@ onBeforeMount(() => {
 
 <style>
 .p-card-body {
-  padding: 10px !important;
+  padding: 6px !important;
   display: unset !important;
 }
 
@@ -259,5 +282,10 @@ onBeforeMount(() => {
 .p-button {
   padding: 10px 20px !important;
   font-size: 14px !important;
+}
+
+.p-paginator {
+  font-size: 16px !important;
+  padding: 2px !important;
 }
 </style>
