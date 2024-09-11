@@ -1,51 +1,20 @@
 <template>
   <div>
     <div class="flex gap-2 mb-4">
-      <InputText
-        id="non-fluid"
-        v-model="todo"
-        type="text"
-        size="small"
-        placeholder="Add a task"
-        fluid
-      />
-      <Button icon="pi pi-plus" @click="handleAdd" size="small" />
+      <custom-input v-model:todo="todo" />
+      <custom-button @handle-click="handleAdd" icon="pi pi-plus" />
     </div>
     <Toast />
     <ConfirmDialog></ConfirmDialog>
-    <Card v-for="(t, index) in paginatedTodos" :key="t" class="my-3 text-sm">
-      <template #content>
-        <div class="flex items-center justify-between">
-          <span class="max-w-[400px] overflow-hidden">{{ t.title }}</span>
-          <div class="flex gap-2 min-w-[250px] justify-between items-center">
-            <div>
-              <Tag
-                :severity="getTagSeverity(t.status)"
-                :value="`${t.status}`"
-                rounded
-                class="text-sm"
-              ></Tag>
-            </div>
-            <div class="flex gap-2">
-              <Button
-                icon="pi pi-pencil"
-                severity="secondary"
-                outlined
-                size="small"
-                @click="openDialogUpdate(t.status, t.title, index)"
-              />
-              <Button
-                @click="confirmDelete(index)"
-                icon="pi pi-trash"
-                severity="danger"
-                size="small"
-                outlined
-              ></Button>
-            </div>
-          </div>
-        </div>
-      </template>
-    </Card>
+    <CardContent
+      v-for="(t, index) in paginatedTodos"
+      :key="t"
+      :todo="t"
+      :id="index"
+      @delete-popup="confirmDelete"
+      @edit-popup="openDialogUpdate"
+    />
+
     <Paginator
       :rows="rowsPerPage"
       :totalRecords="todos.length"
@@ -66,12 +35,7 @@
       >
       <div class="flex items-center gap-4 mb-4">
         <label for="todo" class="font-semibold w-24">Todo</label>
-        <InputText
-          id="todo"
-          class="flex-auto"
-          autocomplete="off"
-          v-model="editTodo"
-        />
+        <custom-input v-model:todo="editTodo" placeholder="Update your todo" />
       </div>
 
       <div class="flex flex-wrap gap-4">
@@ -105,32 +69,29 @@
         </div>
       </div>
       <div class="flex justify-end gap-2 my-4">
-        <Button
-          type="button"
+        <custom-button
+          @handle-click="editVisible = false"
           label="Cancel"
           severity="secondary"
-          @click="editVisible = false"
-        ></Button>
-        <Button type="button" label="Save" @click="handleUpdate"></Button>
+        />
+        <custom-button @handle-click="handleUpdate" label="Save" />
       </div>
     </Dialog>
   </div>
 </template>
 
 <script setup>
-import Button from "primevue/button";
-import Card from "primevue/card";
 import ConfirmDialog from "primevue/confirmdialog";
 import Dialog from "primevue/dialog";
-import InputText from "primevue/inputtext";
 import Paginator from "primevue/paginator";
 import RadioButton from "primevue/radiobutton";
-import Tag from "primevue/tag";
 import Toast from "primevue/toast";
 import { useConfirm } from "primevue/useconfirm";
-
 import { useToast } from "primevue/usetoast";
 import { computed, onBeforeMount, ref } from "vue";
+import CardContent from "./CardContent.vue";
+import CustomButton from "./formComponents/CustomButton.vue";
+import CustomInput from "./formComponents/CustomInput.vue";
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -227,19 +188,6 @@ const confirmDelete = (index) => {
     },
     reject: () => {},
   });
-};
-
-const getTagSeverity = (status) => {
-  switch (status) {
-    case "todo":
-      return "secondary"; // màu xanh dương nhạt
-    case "in progress":
-      return "info"; // màu vàng
-    case "complete":
-      return "success"; // màu xanh lá cây
-    default:
-      return "secondary"; // màu mặc định
-  }
 };
 
 onBeforeMount(() => {
