@@ -34,39 +34,20 @@
         >Update your todo.</span
       >
       <div class="flex items-center gap-4 mb-4">
-        <label for="todo" class="font-semibold w-24">Todo</label>
-        <custom-input v-model:todo="editTodo" placeholder="Update your todo" />
+        <custom-input
+          v-model:todo="editTodo"
+          placeholder="Update your todo"
+          label="Todo"
+        />
       </div>
 
       <div class="flex flex-wrap gap-4">
-        <label class="font-semibold w-24">Status</label>
-        <div class="flex items-center">
-          <RadioButton
-            v-model="status"
-            inputId="ingredient1"
-            name="status"
-            value="todo"
-          />
-          <label for="ingredient1" class="ml-2">Todo</label>
-        </div>
-        <div class="flex items-center">
-          <RadioButton
-            v-model="status"
-            inputId="ingredient2"
-            name="status"
-            value="in progress"
-          />
-          <label for="ingredient2" class="ml-2">In progress</label>
-        </div>
-        <div class="flex items-center">
-          <RadioButton
-            v-model="status"
-            inputId="ingredient3"
-            name="status"
-            value="complete"
-          />
-          <label for="ingredient3" class="ml-2">Complete</label>
-        </div>
+        <select-component
+          label="Status"
+          :values="['todo', 'in progress', 'complete']"
+          name="status"
+          v-model="status"
+        />
       </div>
       <div class="flex justify-end gap-2 my-4">
         <custom-button
@@ -84,7 +65,6 @@
 import ConfirmDialog from "primevue/confirmdialog";
 import Dialog from "primevue/dialog";
 import Paginator from "primevue/paginator";
-import RadioButton from "primevue/radiobutton";
 import Toast from "primevue/toast";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
@@ -92,7 +72,7 @@ import { computed, onBeforeMount, ref } from "vue";
 import CardContent from "./CardContent.vue";
 import CustomButton from "./formComponents/CustomButton.vue";
 import CustomInput from "./formComponents/CustomInput.vue";
-
+import SelectComponent from "./formComponents/SelectComponent.vue";
 const confirm = useConfirm();
 const toast = useToast();
 
